@@ -18,12 +18,11 @@ import {
   TableHeader,
   TableRow
 } from "@/components/ui/table";
-import { AddTaskDialog } from "@/components/add-task-dialog";
 import { Badge } from "@/components/ui/badge";
-import { tasksData } from "@/lib/data";
-import { Task, TasksQueryResponse } from "@/@types/types";
+import AddTaskDialog from "@/components/add-task-dialog";
 import { graphqlClient } from "@/lib/graphqlClient";
 import { TASKS_QUERY } from "@/lib/queries";
+import { Task } from "@/@types/types";
 
 export default function TasksPage() {
   const [isAddTaskOpen, setIsAddTaskOpen] = useState(false);
@@ -34,14 +33,13 @@ export default function TasksPage() {
   useEffect(() => {
     const fetchTasks = async () => {
       try {
-        const data: TasksQueryResponse = await graphqlClient.request(
-          TASKS_QUERY
-        );
+        const data = await graphqlClient.request<{ tasks: Task[] }>(TASKS_QUERY);
         setTasks(data.tasks);
       } catch (error) {
-        console.error("Error fetching tasks:", error);
+        console.error("Failed to fetch tasks:", error);
       }
     };
+
     fetchTasks();
   }, []);
 
@@ -70,6 +68,10 @@ export default function TasksPage() {
         return "bg-blue-900 text-blue-300";
       case "Pending":
         return "bg-amber-900 text-amber-300";
+      case "On Hold":
+        return "bg-yellow-900 text-yellow-300";
+      case "Cancelled":
+        return "bg-red-900 text-red-300";
       default:
         return "bg-zinc-800 text-zinc-300";
     }
@@ -125,9 +127,7 @@ export default function TasksPage() {
               <TableHead className="text-zinc-400 w-[80px]">Task ID</TableHead>
               <TableHead className="text-zinc-400">Project</TableHead>
               <TableHead className="text-zinc-400">Task Name</TableHead>
-              <TableHead className="text-zinc-400 hidden md:table-cell">
-                Description
-              </TableHead>
+              <TableHead className="text-zinc-400 hidden md:table-cell">Description</TableHead>
               <TableHead className="text-zinc-400">Assigned Student</TableHead>
               <TableHead className="text-zinc-400">Status</TableHead>
               <TableHead className="text-zinc-400">Due Date</TableHead>
@@ -144,16 +144,12 @@ export default function TasksPage() {
                 }}
               >
                 <TableCell className="font-medium">{task.id}</TableCell>
-                <TableCell>{task.projectId}</TableCell>
+                <TableCell>{task.projectTitle}</TableCell>
                 <TableCell>{task.taskName}</TableCell>
-                <TableCell className="hidden md:table-cell">
-                  {task.description}
-                </TableCell>
+                <TableCell className="hidden md:table-cell">{task.description}</TableCell>
                 <TableCell>{task.assignedStudent}</TableCell>
                 <TableCell>
-                  <Badge className={getStatusColor(task.status)}>
-                    {task.status}
-                  </Badge>
+                  <Badge className={getStatusColor(task.status)}>{task.status}</Badge>
                 </TableCell>
                 <TableCell>{task.dueDate}</TableCell>
               </TableRow>
@@ -166,6 +162,7 @@ export default function TasksPage() {
         open={isAddTaskOpen}
         onOpenChange={setIsAddTaskOpen}
         taskId={editingTask}
+        existingTask={tasks.find((t) => t.id === editingTask)}
       />
     </div>
   );

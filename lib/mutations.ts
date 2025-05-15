@@ -56,3 +56,57 @@ export const CREATE_PROJECT = gql`
     }
   }
 `;
+
+export const CREATE_TASK = gql`
+  mutation CreateTask(
+    $projectId: String!
+    $projectTitle: String!
+    $taskName: String!
+    $description: String
+    $assignedStudent: String!
+    $status: String
+    $dueDate: String
+  ) {
+    createTask(
+      projectId: $projectId
+      projectTitle: $projectTitle
+      taskName: $taskName
+      description: $description
+      assignedStudent: $assignedStudent
+      status: $status
+      dueDate: $dueDate
+    ) {
+      id
+      taskName
+      status
+    }
+  }
+`;
+
+export const UPDATE_TASK = gql`
+  mutation UpdateTask(
+    $id: String!
+    $projectId: String
+    $projectTitle: String
+    $taskName: String
+    $description: String
+    $assignedStudent: String
+    $status: String
+    $dueDate: String
+  ) {
+    updateTask(
+      id: $id
+      projectId: $projectId
+      projectTitle: $projectTitle
+      taskName: $taskName
+      description: $description
+      assignedStudent: $assignedStudent
+      status: $status
+      dueDate: $dueDate
+    ) {
+      id
+      taskName
+      status
+    }
+  }
+`;

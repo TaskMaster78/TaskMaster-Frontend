@@ -66,3 +66,6 @@ export type Task = {
 export type TasksQueryResponse = {
   tasks: Task[];
 };
+
+export type StudentSummary = { id: string; name: string };
+export type ProjectSummary = { id: string; title: string };

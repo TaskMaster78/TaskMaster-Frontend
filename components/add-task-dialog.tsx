@@ -1,8 +1,6 @@
 "use client";
 
-import type React from "react";
-
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -22,59 +20,112 @@ import {
   SelectValue
 } from "@/components/ui/select";
 import { X } from "lucide-react";
-import { projectsData, studentsData, tasksData } from "@/lib/data";
+import { graphqlClient } from "@/lib/graphqlClient";
+import { CREATE_TASK, UPDATE_TASK } from "@/lib/mutations";
+import { getProjectsQuery, STUDENTS_QUERY } from "@/lib/queries";
+import { toast } from "sonner";
+import { ProjectSummary, StudentSummary } from "@/@types/types";
+import { useAuth } from "@/context/AuthContext";
 
 interface AddTaskDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   taskId?: string | null;
+  existingTask?: any;
 }
 
-export function AddTaskDialog({
+export default function AddTaskDialog({
   open,
   onOpenChange,
-  taskId
+  taskId,
+  existingTask
 }: AddTaskDialogProps) {
   const [formData, setFormData] = useState({
-    project: "",
-    name: "",
+    projectId: "",
+    projectTitle: "",
+    taskName: "",
     description: "",
     assignedStudent: "",
     status: "In Progress",
     dueDate: ""
   });
 
+  const [students, setStudents] = useState<{ id: string; name: string }[]>([]);
+  const [projects, setProjects] = useState<{ id: string; title: string }[]>([]);
+  const { role } = useAuth();
+
   useEffect(() => {
-    if (taskId) {
-      const task = tasksData.find((t) => t.id === taskId);
-      if (task) {
-        setFormData({
-          project: task.project,
-          name: task.name,
-          description: task.description,
-          assignedStudent: task.assignedStudent,
-          status: task.status,
-          dueDate: task.dueDate
-        });
-      }
-    } else {
-      // Reset form for new task
+    if (existingTask && taskId) {
       setFormData({
-        project: "",
-        name: "",
+        projectId: existingTask.projectId,
+        projectTitle: existingTask.projectTitle,
+        taskName: existingTask.taskName,
+        description: existingTask.description,
+        assignedStudent: existingTask.assignedStudent,
+        status: existingTask.status,
+        dueDate: existingTask.dueDate.split("T")[0]
+      });
+    } else {
+      setFormData({
+        projectId: "",
+        projectTitle: "",
+        taskName: "",
         description: "",
         assignedStudent: "",
         status: "In Progress",
         dueDate: ""
       });
     }
-  }, [taskId, open]);
+  }, [taskId, existingTask]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const studentData = await graphqlClient.request<{
+          students: StudentSummary[];
+        }>(STUDENTS_QUERY);
+
+        const projectData = await graphqlClient.request<{
+          myProjects?: ProjectSummary[];
+          allProjects?: ProjectSummary[];
+        }>(getProjectsQuery(role || "student"));
+
+        setStudents(studentData.students);
+        setProjects(projectData.myProjects || projectData.allProjects || []);
+      } catch (err) {
+        console.error("Error fetching students/projects:", err);
+      }
+    };
+
+    fetchData();
+  }, [role]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log(formData);
 
-    onOpenChange(false);
+    const variables = {
+      projectId: formData.projectId,
+      projectTitle: formData.projectTitle,
+      taskName: formData.taskName,
+      description: formData.description,
+      assignedStudent: formData.assignedStudent,
+      status: formData.status,
+      dueDate: formData.dueDate
+    };
+
+    try {
+      if (taskId) {
+        await graphqlClient.request(UPDATE_TASK, { id: taskId, ...variables });
+        toast.success("Task updated successfully!");
+      } else {
+        await graphqlClient.request(CREATE_TASK, variables);
+        toast.success("Task created successfully!");
+      }
+      onOpenChange(false);
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to save task");
+    }
   };
 
   return (
@@ -84,7 +135,7 @@ export function AddTaskDialog({
           <DialogTitle className="text-2xl font-bold text-blue-500">
             {taskId ? "Edit Task" : "Create New Task"}
           </DialogTitle>
-          <DialogClose className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
+          <DialogClose className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
             <X className="h-6 w-6" />
             <span className="sr-only">Close</span>
           </DialogClose>
@@ -92,21 +143,24 @@ export function AddTaskDialog({
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="project" className="text-zinc-300">
-              Project Title:
-            </Label>
+            <Label>Project</Label>
             <Select
-              value={formData.project}
-              onValueChange={(value) =>
-                setFormData({ ...formData, project: value })
-              }
+              value={formData.projectId}
+              onValueChange={(id) => {
+                const title = projects.find((p) => p.id === id)?.title || "";
+                setFormData((prev) => ({
+                  ...prev,
+                  projectId: id,
+                  projectTitle: title
+                }));
+              }}
             >
               <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white">
                 <SelectValue placeholder="Select a project" />
               </SelectTrigger>
               <SelectContent className="bg-zinc-800 border-zinc-700 text-white">
-                {projectsData.map((project) => (
-                  <SelectItem key={project.id} value={project.title}>
+                {projects.map((project) => (
+                  <SelectItem key={project.id} value={project.id}>
                     {project.title}
                   </SelectItem>
                 ))}
@@ -115,14 +169,11 @@ export function AddTaskDialog({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="name" className="text-zinc-300">
-              Task Name:
-            </Label>
+            <Label>Task Name</Label>
             <Input
-              id="name"
-              value={formData.name}
+              value={formData.taskName}
               onChange={(e) =>
-                setFormData({ ...formData, name: e.target.value })
+                setFormData({ ...formData, taskName: e.target.value })
               }
               className="bg-zinc-800 border-zinc-700 text-white"
               required
@@ -130,11 +181,8 @@ export function AddTaskDialog({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description" className="text-zinc-300">
-              Description:
-            </Label>
+            <Label>Description</Label>
             <Textarea
-              id="description"
               value={formData.description}
               onChange={(e) =>
                 setFormData({ ...formData, description: e.target.value })
@@ -145,9 +193,7 @@ export function AddTaskDialog({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="assignedStudent" className="text-zinc-300">
-              Assigned Student:
-            </Label>
+            <Label>Assigned Student</Label>
             <Select
               value={formData.assignedStudent}
               onValueChange={(value) =>
@@ -158,8 +204,8 @@ export function AddTaskDialog({
                 <SelectValue placeholder="Select a student" />
               </SelectTrigger>
               <SelectContent className="bg-zinc-800 border-zinc-700 text-white">
-                {studentsData.map((student) => (
-                  <SelectItem key={student.id} value={student.name}>
+                {students.map((student) => (
+                  <SelectItem key={student.id} value={student.id}>
                     {student.name}
                   </SelectItem>
                 ))}
@@ -168,9 +214,7 @@ export function AddTaskDialog({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="status" className="text-zinc-300">
-              Status:
-            </Label>
+            <Label>Status</Label>
             <Select
               value={formData.status}
               onValueChange={(value) =>
@@ -191,11 +235,8 @@ export function AddTaskDialog({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="dueDate" className="text-zinc-300">
-              Due Date:
-            </Label>
+            <Label>Due Date</Label>
             <Input
-              id="dueDate"
               type="date"
               value={formData.dueDate}
               onChange={(e) =>

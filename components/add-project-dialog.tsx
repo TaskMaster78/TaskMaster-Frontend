@@ -24,12 +24,12 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Checkbox } from "@/components/ui/checkbox";
 import { X } from "lucide-react";
-import { studentsData } from "@/lib/data";
 import { toast } from "sonner";
 import { graphqlClient } from "@/lib/graphqlClient";
 import { CREATE_PROJECT } from "@/lib/mutations";
-import { gql } from "graphql-request";
+
 import { Student, StudentsQueryResponse } from "@/@types/types";
+import { STUDENTS_QUERY } from "@/lib/queries";
 
 interface AddProjectDialogProps {
   open: boolean;
@@ -49,14 +49,7 @@ export function AddProjectDialog({
     status: "In Progress",
     selectedStudents: [] as string[]
   });
-  const STUDENTS_QUERY = gql`
-    query {
-      students {
-        id
-        name
-      }
-    }
-  `;
+
 
   const [students, setStudents] = useState<Student[]>([]);
 
