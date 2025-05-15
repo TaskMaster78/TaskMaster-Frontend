@@ -1,26 +1,45 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState } from "react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Checkbox } from "@/components/ui/checkbox"
-import { X } from "lucide-react"
-import { studentsData } from "@/lib/data"
-import { toast } from "sonner"
+import { useEffect, useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogClose
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "@/components/ui/select";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Checkbox } from "@/components/ui/checkbox";
+import { X } from "lucide-react";
+import { studentsData } from "@/lib/data";
+import { toast } from "sonner";
+import { graphqlClient } from "@/lib/graphqlClient";
+import { CREATE_PROJECT } from "@/lib/mutations";
+import { gql } from "graphql-request";
+import { Student, StudentsQueryResponse } from "@/@types/types";
 
 interface AddProjectDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
-export function AddProjectDialog({ open, onOpenChange }: AddProjectDialogProps) {
+export function AddProjectDialog({
+  open,
+  onOpenChange
+}: AddProjectDialogProps) {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -28,33 +47,66 @@ export function AddProjectDialog({ open, onOpenChange }: AddProjectDialogProps) 
     startDate: "",
     endDate: "",
     status: "In Progress",
-    selectedStudents: [] as string[],
-  })
+    selectedStudents: [] as string[]
+  });
+  const STUDENTS_QUERY = gql`
+    query {
+      students {
+        id
+        name
+      }
+    }
+  `;
+
+  const [students, setStudents] = useState<Student[]>([]);
+
+  useEffect(() => {
+    const fetchStudents = async () => {
+      try {
+        const data: StudentsQueryResponse = await graphqlClient.request(
+          STUDENTS_QUERY
+        );
+        setStudents(data.students);
+      } catch (error) {
+        console.error("Error fetching students:", error);
+      }
+    };
+
+    fetchStudents();
+  }, []);
 
   const handleStudentToggle = (studentId: string) => {
     setFormData((prev) => {
-      const isSelected = prev.selectedStudents.includes(studentId)
+      const isSelected = prev.selectedStudents.includes(studentId);
       return {
         ...prev,
         selectedStudents: isSelected
           ? prev.selectedStudents.filter((id) => id !== studentId)
-          : [...prev.selectedStudents, studentId],
-      }
-    })
-  }
+          : [...prev.selectedStudents, studentId]
+      };
+    });
+  };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    console.log(formData);
-    toast.success('Project is console logged');
-    onOpenChange(false)
-  }
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    try {
+      await graphqlClient.request(CREATE_PROJECT, formData);
+      toast.success("Project created successfully!");
+      onOpenChange(false);
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to create project.");
+    }
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="bg-zinc-900 border-zinc-800 text-white max-w-2xl max-h-[90vh] overflow-hidden p-0">
         <DialogHeader className="p-6 pb-2">
-          <DialogTitle className="text-2xl font-bold text-blue-500">Add New Project</DialogTitle>
+          <DialogTitle className="text-2xl font-bold text-blue-500">
+            Add New Project
+          </DialogTitle>
           <DialogClose className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
             <X className="h-6 w-6" />
             <span className="sr-only">Close</span>
@@ -70,7 +122,9 @@ export function AddProjectDialog({ open, onOpenChange }: AddProjectDialogProps) 
               <Input
                 id="title"
                 value={formData.title}
-                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, title: e.target.value })
+                }
                 className="bg-zinc-800 border-zinc-700 text-white"
                 required
               />
@@ -83,7 +137,9 @@ export function AddProjectDialog({ open, onOpenChange }: AddProjectDialogProps) 
               <Textarea
                 id="description"
                 value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, description: e.target.value })
+                }
                 className="bg-zinc-800 border-zinc-700 text-white min-h-[120px]"
                 required
               />
@@ -92,14 +148,20 @@ export function AddProjectDialog({ open, onOpenChange }: AddProjectDialogProps) 
             <div className="space-y-2">
               <Label className="text-zinc-300">Students List:</Label>
               <div className="border border-zinc-700 rounded-md p-2 max-h-[200px] overflow-y-auto">
-                {studentsData.map((student) => (
-                  <div key={student.id} className="flex items-center space-x-2 py-2">
+                {students.map((student) => (
+                  <div
+                    key={student.id}
+                    className="flex items-center space-x-2 py-2"
+                  >
                     <Checkbox
                       id={`student-${student.id}`}
                       checked={formData.selectedStudents.includes(student.id)}
                       onCheckedChange={() => handleStudentToggle(student.id)}
                     />
-                    <Label htmlFor={`student-${student.id}`} className="text-zinc-300 cursor-pointer">
+                    <Label
+                      htmlFor={`student-${student.id}`}
+                      className="text-zinc-300 cursor-pointer"
+                    >
                       {student.name}
                     </Label>
                   </div>
@@ -113,17 +175,27 @@ export function AddProjectDialog({ open, onOpenChange }: AddProjectDialogProps) 
               </Label>
               <Select
                 value={formData.category}
-                onValueChange={(value) => setFormData({ ...formData, category: value })}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, category: value })
+                }
               >
                 <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white">
                   <SelectValue placeholder="Select a category" />
                 </SelectTrigger>
                 <SelectContent className="bg-zinc-800 border-zinc-700 text-white">
-                  <SelectItem value="Web Development">Web Development</SelectItem>
-                  <SelectItem value="Mobile Development">Mobile Development</SelectItem>
+                  <SelectItem value="Web Development">
+                    Web Development
+                  </SelectItem>
+                  <SelectItem value="Mobile Development">
+                    Mobile Development
+                  </SelectItem>
                   <SelectItem value="Data Science">Data Science</SelectItem>
-                  <SelectItem value="Machine Learning">Machine Learning</SelectItem>
-                  <SelectItem value="E-commerce Platform">E-commerce Platform</SelectItem>
+                  <SelectItem value="Machine Learning">
+                    Machine Learning
+                  </SelectItem>
+                  <SelectItem value="E-commerce Platform">
+                    E-commerce Platform
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -136,7 +208,9 @@ export function AddProjectDialog({ open, onOpenChange }: AddProjectDialogProps) 
                 id="startDate"
                 type="date"
                 value={formData.startDate}
-                onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, startDate: e.target.value })
+                }
                 className="bg-zinc-800 border-zinc-700 text-white"
                 required
               />
@@ -150,7 +224,9 @@ export function AddProjectDialog({ open, onOpenChange }: AddProjectDialogProps) 
                 id="endDate"
                 type="date"
                 value={formData.endDate}
-                onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, endDate: e.target.value })
+                }
                 className="bg-zinc-800 border-zinc-700 text-white"
                 required
               />
@@ -160,7 +236,12 @@ export function AddProjectDialog({ open, onOpenChange }: AddProjectDialogProps) 
               <Label htmlFor="status" className="text-zinc-300">
                 Project Status:
               </Label>
-              <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value })}>
+              <Select
+                value={formData.status}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, status: value })
+                }
+              >
                 <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white">
                   <SelectValue placeholder="Select a status" />
                 </SelectTrigger>
@@ -174,12 +255,15 @@ export function AddProjectDialog({ open, onOpenChange }: AddProjectDialogProps) 
               </Select>
             </div>
 
-            <Button type="submit" className="w-full bg-green-600 hover:bg-green-700">
+            <Button
+              type="submit"
+              className="w-full bg-green-600 hover:bg-green-700"
+            >
               Add Project
             </Button>
           </form>
         </ScrollArea>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

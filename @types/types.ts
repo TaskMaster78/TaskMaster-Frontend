@@ -38,3 +38,14 @@ export type AllProjectsResponse = {
 export type MyProjectsResponse = {
   myProjects: ProjectAPI[];
 };
+
+export type Student = {
+  id: string; // The ObjectId from MongoDB
+  name: string; // Student full name
+  username: string;
+  universityId: string;
+};
+
+export type StudentsQueryResponse = {
+  students: Student[];
+};

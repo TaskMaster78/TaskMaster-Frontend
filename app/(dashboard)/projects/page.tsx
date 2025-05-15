@@ -149,20 +149,24 @@ export default function ProjectsPage() {
         className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
       >
         <AnimatePresence>
-          {filteredProjects.map((project, index) => (
-            <motion.div
-              key={project.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              transition={{ delay: index * 0.05 }}
-            >
-              <ProjectCard
-                project={project}
-                onClick={() => setSelectedProject(project.id)}
-              />
-            </motion.div>
-          ))}
+          {filteredProjects.length > 0 ? (
+            filteredProjects.map((project, index) => (
+              <motion.div
+                key={project.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ delay: index * 0.05 }}
+              >
+                <ProjectCard
+                  project={project}
+                  onClick={() => setSelectedProject(project.id)}
+                />
+              </motion.div>
+            ))
+          ) : (
+            <div>No projects available to display</div> // TODO: fix the style of this div here to display a safe message if there is no projects.
+          )}
         </AnimatePresence>
       </motion.div>
 
