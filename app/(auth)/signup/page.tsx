@@ -17,10 +17,10 @@ import {
   CardHeader,
   CardTitle
 } from "@/components/ui/card";
-import { graphqlClient } from "@/lib/graphqlClient";
 import { SIGNUP_MUTATION } from "@/lib/mutations";
 import { SignupResponse } from "@/@types/types";
 import { toast } from "sonner";
+import { getGraphqlClient } from "@/lib/graphqlClient";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -48,7 +48,7 @@ export default function SignupPage() {
     };
 
     try {
-      const data = (await graphqlClient.request(
+      const data = (await getGraphqlClient().request(
         SIGNUP_MUTATION,
         payload
       )) as SignupResponse;

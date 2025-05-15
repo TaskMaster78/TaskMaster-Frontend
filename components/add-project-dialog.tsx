@@ -23,13 +23,11 @@ import {
 } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Checkbox } from "@/components/ui/checkbox";
-import { X } from "lucide-react";
 import { toast } from "sonner";
-import { graphqlClient } from "@/lib/graphqlClient";
 import { CREATE_PROJECT } from "@/lib/mutations";
-
 import { Student, StudentsQueryResponse } from "@/@types/types";
 import { STUDENTS_QUERY } from "@/lib/queries";
+import { getGraphqlClient } from "@/lib/graphqlClient";
 
 interface AddProjectDialogProps {
   open: boolean;
@@ -50,13 +48,12 @@ export function AddProjectDialog({
     selectedStudents: [] as string[]
   });
 
-
   const [students, setStudents] = useState<Student[]>([]);
 
   useEffect(() => {
     const fetchStudents = async () => {
       try {
-        const data: StudentsQueryResponse = await graphqlClient.request(
+        const data: StudentsQueryResponse = await getGraphqlClient().request(
           STUDENTS_QUERY
         );
         setStudents(data.students);
@@ -84,7 +81,7 @@ export function AddProjectDialog({
     e.preventDefault();
 
     try {
-      await graphqlClient.request(CREATE_PROJECT, formData);
+      await getGraphqlClient().request(CREATE_PROJECT, formData);
       toast.success("Project created successfully!");
       onOpenChange(false);
     } catch (err) {
@@ -100,10 +97,6 @@ export function AddProjectDialog({
           <DialogTitle className="text-2xl font-bold text-blue-500">
             Add New Project
           </DialogTitle>
-          <DialogClose className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
-            <X className="h-6 w-6" />
-            <span className="sr-only">Close</span>
-          </DialogClose>
         </DialogHeader>
 
         <ScrollArea className="max-h-[calc(90vh-80px)] px-6 pb-6">

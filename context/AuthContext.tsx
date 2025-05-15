@@ -1,10 +1,10 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { graphqlClient } from "@/lib/graphqlClient";
 import { LOGIN_MUTATION } from "@/lib/mutations";
 import { useRouter } from "next/navigation";
 import { LoginResponse } from "@/@types/types";
+import { getGraphqlClient } from "@/lib/graphqlClient";
 
 type Role = "admin" | "student";
 
@@ -46,7 +46,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const login = async (username: string, password: string) => {
-    const data: LoginResponse = await graphqlClient.request(LOGIN_MUTATION, {
+    const data: LoginResponse = await getGraphqlClient().request(LOGIN_MUTATION, {
       username,
       password
     });

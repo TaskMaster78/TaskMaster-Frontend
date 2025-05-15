@@ -22,8 +22,9 @@ import type {
 } from "@/@types/types";
 
 import { useAuth } from "@/context/AuthContext";
-import { graphqlClient } from "@/lib/graphqlClient";
+
 import { gql } from "graphql-request";
+import { getGraphqlClient } from "@/lib/graphqlClient";
 
 export default function ProjectsPage() {
   const { role, userId } = useAuth();
@@ -64,10 +65,10 @@ export default function ProjectsPage() {
 
       try {
         if (role === "admin") {
-          const data: AllProjectsResponse = await graphqlClient.request(query);
+          const data: AllProjectsResponse = await getGraphqlClient().request(query);
           setProjects(data.allProjects);
         } else {
-          const data: MyProjectsResponse = await graphqlClient.request(query);
+          const data: MyProjectsResponse = await getGraphqlClient().request(query);
           setProjects(data.myProjects);
         }
       } catch (err) {

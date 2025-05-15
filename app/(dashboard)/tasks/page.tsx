@@ -20,9 +20,9 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import AddTaskDialog from "@/components/add-task-dialog";
-import { graphqlClient } from "@/lib/graphqlClient";
 import { TASKS_QUERY } from "@/lib/queries";
 import { Task } from "@/@types/types";
+import { getGraphqlClient } from "@/lib/graphqlClient";
 
 export default function TasksPage() {
   const [isAddTaskOpen, setIsAddTaskOpen] = useState(false);
@@ -33,7 +33,7 @@ export default function TasksPage() {
   useEffect(() => {
     const fetchTasks = async () => {
       try {
-        const data = await graphqlClient.request<{ tasks: Task[] }>(TASKS_QUERY);
+        const data = await getGraphqlClient().request<{ tasks: Task[] }>(TASKS_QUERY);
         setTasks(data.tasks);
       } catch (error) {
         console.error("Failed to fetch tasks:", error);
