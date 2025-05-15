@@ -1,36 +1,52 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState, useEffect } from "react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { X } from "lucide-react"
-import { projectsData, studentsData, tasksData } from "@/lib/data"
+import { useState, useEffect } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogClose
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "@/components/ui/select";
+import { X } from "lucide-react";
+import { projectsData, studentsData, tasksData } from "@/lib/data";
 
 interface AddTaskDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  taskId?: string | null
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  taskId?: string | null;
 }
 
-export function AddTaskDialog({ open, onOpenChange, taskId }: AddTaskDialogProps) {
+export function AddTaskDialog({
+  open,
+  onOpenChange,
+  taskId
+}: AddTaskDialogProps) {
   const [formData, setFormData] = useState({
     project: "",
     name: "",
     description: "",
     assignedStudent: "",
     status: "In Progress",
-    dueDate: "",
-  })
+    dueDate: ""
+  });
 
   useEffect(() => {
     if (taskId) {
-      const task = tasksData.find((t) => t.id === taskId)
+      const task = tasksData.find((t) => t.id === taskId);
       if (task) {
         setFormData({
           project: task.project,
@@ -38,8 +54,8 @@ export function AddTaskDialog({ open, onOpenChange, taskId }: AddTaskDialogProps
           description: task.description,
           assignedStudent: task.assignedStudent,
           status: task.status,
-          dueDate: task.dueDate,
-        })
+          dueDate: task.dueDate
+        });
       }
     } else {
       // Reset form for new task
@@ -49,16 +65,17 @@ export function AddTaskDialog({ open, onOpenChange, taskId }: AddTaskDialogProps
         description: "",
         assignedStudent: "",
         status: "In Progress",
-        dueDate: "",
-      })
+        dueDate: ""
+      });
     }
-  }, [taskId, open])
+  }, [taskId, open]);
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    // In a real app, you would save the task here
-    onOpenChange(false)
-  }
+    e.preventDefault();
+    console.log(formData);
+
+    onOpenChange(false);
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -78,7 +95,12 @@ export function AddTaskDialog({ open, onOpenChange, taskId }: AddTaskDialogProps
             <Label htmlFor="project" className="text-zinc-300">
               Project Title:
             </Label>
-            <Select value={formData.project} onValueChange={(value) => setFormData({ ...formData, project: value })}>
+            <Select
+              value={formData.project}
+              onValueChange={(value) =>
+                setFormData({ ...formData, project: value })
+              }
+            >
               <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white">
                 <SelectValue placeholder="Select a project" />
               </SelectTrigger>
@@ -99,7 +121,9 @@ export function AddTaskDialog({ open, onOpenChange, taskId }: AddTaskDialogProps
             <Input
               id="name"
               value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, name: e.target.value })
+              }
               className="bg-zinc-800 border-zinc-700 text-white"
               required
             />
@@ -112,7 +136,9 @@ export function AddTaskDialog({ open, onOpenChange, taskId }: AddTaskDialogProps
             <Textarea
               id="description"
               value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, description: e.target.value })
+              }
               className="bg-zinc-800 border-zinc-700 text-white min-h-[100px]"
               required
             />
@@ -124,7 +150,9 @@ export function AddTaskDialog({ open, onOpenChange, taskId }: AddTaskDialogProps
             </Label>
             <Select
               value={formData.assignedStudent}
-              onValueChange={(value) => setFormData({ ...formData, assignedStudent: value })}
+              onValueChange={(value) =>
+                setFormData({ ...formData, assignedStudent: value })
+              }
             >
               <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white">
                 <SelectValue placeholder="Select a student" />
@@ -143,7 +171,12 @@ export function AddTaskDialog({ open, onOpenChange, taskId }: AddTaskDialogProps
             <Label htmlFor="status" className="text-zinc-300">
               Status:
             </Label>
-            <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value })}>
+            <Select
+              value={formData.status}
+              onValueChange={(value) =>
+                setFormData({ ...formData, status: value })
+              }
+            >
               <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white">
                 <SelectValue placeholder="Select a status" />
               </SelectTrigger>
@@ -165,17 +198,22 @@ export function AddTaskDialog({ open, onOpenChange, taskId }: AddTaskDialogProps
               id="dueDate"
               type="date"
               value={formData.dueDate}
-              onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, dueDate: e.target.value })
+              }
               className="bg-zinc-800 border-zinc-700 text-white"
               required
             />
           </div>
 
-          <Button type="submit" className="w-full bg-green-600 hover:bg-green-700">
+          <Button
+            type="submit"
+            className="w-full bg-green-600 hover:bg-green-700"
+          >
             {taskId ? "Update Task" : "Add Task"}
           </Button>
         </form>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

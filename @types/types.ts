@@ -49,3 +49,20 @@ export type Student = {
 export type StudentsQueryResponse = {
   students: Student[];
 };
+
+export type Task = {
+  id: string;
+  projectId: string;
+  projectTitle: string;
+  taskName: string;
+  description: string;
+  assignedStudent: string;
+  status: string;
+  dueDate: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type TasksQueryResponse = {
+  tasks: Task[];
+};

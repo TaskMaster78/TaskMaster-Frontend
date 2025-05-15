@@ -1,53 +1,88 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { motion } from "framer-motion"
-import { Button } from "@/components/ui/button"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { AddTaskDialog } from "@/components/add-task-dialog"
-import { Badge } from "@/components/ui/badge"
-import { tasksData } from "@/lib/data"
+import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow
+} from "@/components/ui/table";
+import { AddTaskDialog } from "@/components/add-task-dialog";
+import { Badge } from "@/components/ui/badge";
+import { tasksData } from "@/lib/data";
+import { Task, TasksQueryResponse } from "@/@types/types";
+import { graphqlClient } from "@/lib/graphqlClient";
+import { TASKS_QUERY } from "@/lib/queries";
 
 export default function TasksPage() {
-  const [isAddTaskOpen, setIsAddTaskOpen] = useState(false)
-  const [editingTask, setEditingTask] = useState<string | null>(null)
-  const [sortBy, setSortBy] = useState("Task Status")
+  const [isAddTaskOpen, setIsAddTaskOpen] = useState(false);
+  const [editingTask, setEditingTask] = useState<string | null>(null);
+  const [sortBy, setSortBy] = useState("Task Status");
+  const [tasks, setTasks] = useState<Task[]>([]);
+
+  useEffect(() => {
+    const fetchTasks = async () => {
+      try {
+        const data: TasksQueryResponse = await graphqlClient.request(
+          TASKS_QUERY
+        );
+        setTasks(data.tasks);
+      } catch (error) {
+        console.error("Error fetching tasks:", error);
+      }
+    };
+    fetchTasks();
+  }, []);
 
   const getSortedTasks = () => {
-    return [...tasksData].sort((a, b) => {
+    return [...tasks].sort((a, b) => {
       switch (sortBy) {
         case "Task Status":
-          return a.status.localeCompare(b.status)
+          return a.status.localeCompare(b.status);
         case "Project":
-          return a.project.localeCompare(b.project)
+          return a.projectTitle.localeCompare(b.projectTitle);
         case "Due Date":
-          return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime()
+          return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
         case "Assigned Student":
-          return a.assignedStudent.localeCompare(b.assignedStudent)
+          return a.assignedStudent.localeCompare(b.assignedStudent);
         default:
-          return 0
+          return 0;
       }
-    })
-  }
+    });
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case "In Progress":
-        return "bg-green-900 text-green-300"
+        return "bg-green-900 text-green-300";
       case "Completed":
-        return "bg-blue-900 text-blue-300"
+        return "bg-blue-900 text-blue-300";
       case "Pending":
-        return "bg-amber-900 text-amber-300"
+        return "bg-amber-900 text-amber-300";
       default:
-        return "bg-zinc-800 text-zinc-300"
+        return "bg-zinc-800 text-zinc-300";
     }
-  }
+  };
 
   return (
     <div className="p-6 space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-2">
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          className="flex items-center gap-2"
+        >
           <span className="text-zinc-400">Sort By:</span>
           <Select value={sortBy} onValueChange={setSortBy}>
             <SelectTrigger className="w-[180px] bg-zinc-800 border-zinc-700 text-white">
@@ -62,11 +97,14 @@ export default function TasksPage() {
           </Select>
         </motion.div>
 
-        <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
+        <motion.div
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+        >
           <Button
             onClick={() => {
-              setEditingTask(null)
-              setIsAddTaskOpen(true)
+              setEditingTask(null);
+              setIsAddTaskOpen(true);
             }}
             className="bg-blue-600 hover:bg-blue-700"
           >
@@ -87,7 +125,9 @@ export default function TasksPage() {
               <TableHead className="text-zinc-400 w-[80px]">Task ID</TableHead>
               <TableHead className="text-zinc-400">Project</TableHead>
               <TableHead className="text-zinc-400">Task Name</TableHead>
-              <TableHead className="text-zinc-400 hidden md:table-cell">Description</TableHead>
+              <TableHead className="text-zinc-400 hidden md:table-cell">
+                Description
+              </TableHead>
               <TableHead className="text-zinc-400">Assigned Student</TableHead>
               <TableHead className="text-zinc-400">Status</TableHead>
               <TableHead className="text-zinc-400">Due Date</TableHead>
@@ -99,17 +139,21 @@ export default function TasksPage() {
                 key={task.id}
                 className="hover:bg-zinc-800/50 border-zinc-800 cursor-pointer"
                 onClick={() => {
-                  setEditingTask(task.id)
-                  setIsAddTaskOpen(true)
+                  setEditingTask(task.id);
+                  setIsAddTaskOpen(true);
                 }}
               >
                 <TableCell className="font-medium">{task.id}</TableCell>
-                <TableCell>{task.project}</TableCell>
-                <TableCell>{task.name}</TableCell>
-                <TableCell className="hidden md:table-cell">{task.description}</TableCell>
+                <TableCell>{task.projectId}</TableCell>
+                <TableCell>{task.taskName}</TableCell>
+                <TableCell className="hidden md:table-cell">
+                  {task.description}
+                </TableCell>
                 <TableCell>{task.assignedStudent}</TableCell>
                 <TableCell>
-                  <Badge className={getStatusColor(task.status)}>{task.status}</Badge>
+                  <Badge className={getStatusColor(task.status)}>
+                    {task.status}
+                  </Badge>
                 </TableCell>
                 <TableCell>{task.dueDate}</TableCell>
               </TableRow>
@@ -118,7 +162,11 @@ export default function TasksPage() {
         </Table>
       </motion.div>
 
-      <AddTaskDialog open={isAddTaskOpen} onOpenChange={setIsAddTaskOpen} taskId={editingTask} />
+      <AddTaskDialog
+        open={isAddTaskOpen}
+        onOpenChange={setIsAddTaskOpen}
+        taskId={editingTask}
+      />
     </div>
-  )
+  );
 }
