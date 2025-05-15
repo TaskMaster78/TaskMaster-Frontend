@@ -13,6 +13,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Checkbox } from "@/components/ui/checkbox"
 import { X } from "lucide-react"
 import { studentsData } from "@/lib/data"
+import { toast } from "sonner"
 
 interface AddProjectDialogProps {
   open: boolean
@@ -44,7 +45,8 @@ export function AddProjectDialog({ open, onOpenChange }: AddProjectDialogProps) 
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    // In a real app, you would save the project here
+    console.log(formData);
+    toast.success('Project is console logged');
     onOpenChange(false)
   }
 

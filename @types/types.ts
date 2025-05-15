@@ -14,3 +14,27 @@ export type LoginResponse = {
     role: "student" | "admin";
   };
 };
+
+export type ProjectAPI = {
+  id: string;
+  title: string;
+  description: string;
+  selectedStudents: string[];
+  category: string;
+  status: string;
+  startDate: string;
+  endDate: string;
+};
+
+export type ProjectUI = Omit<ProjectAPI, "selectedStudents"> & {
+  students: string[];
+  progress: number; // you may hardcode 100% or calculate later
+};
+
+export type AllProjectsResponse = {
+  allProjects: ProjectAPI[];
+};
+
+export type MyProjectsResponse = {
+  myProjects: ProjectAPI[];
+};

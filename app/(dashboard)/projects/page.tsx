@@ -1,29 +1,86 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { motion, AnimatePresence } from "framer-motion"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { ProjectCard } from "@/components/project-card"
-import { AddProjectDialog } from "@/components/add-project-dialog"
-import { ProjectDrawer } from "@/components/project-drawer"
-import { Search } from "lucide-react"
-import { projectsData } from "@/lib/data"
+import { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "@/components/ui/select";
+import { ProjectCard } from "@/components/project-card";
+import { AddProjectDialog } from "@/components/add-project-dialog";
+import { ProjectDrawer } from "@/components/project-drawer";
+import { Search } from "lucide-react";
+import type {
+  AllProjectsResponse,
+  MyProjectsResponse,
+  ProjectAPI
+} from "@/@types/types";
+
+import { useAuth } from "@/context/AuthContext";
+import { graphqlClient } from "@/lib/graphqlClient";
+import { gql } from "graphql-request";
 
 export default function ProjectsPage() {
-  const [isAddProjectOpen, setIsAddProjectOpen] = useState(false)
-  const [selectedProject, setSelectedProject] = useState<string | null>(null)
-  const [statusFilter, setStatusFilter] = useState("All Statuses")
-  const [searchQuery, setSearchQuery] = useState("")
+  const { role, userId } = useAuth();
+  const [isAddProjectOpen, setIsAddProjectOpen] = useState(false);
+  const [selectedProject, setSelectedProject] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState("All Statuses");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [projects, setProjects] = useState<ProjectAPI[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const filteredProjects = projectsData.filter((project) => {
-    const matchesStatus = statusFilter === "All Statuses" || project.status === statusFilter
+  const filteredProjects = projects.filter((project) => {
+    const matchesStatus =
+      statusFilter === "All Statuses" || project.status === statusFilter;
     const matchesSearch =
       project.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      project.description.toLowerCase().includes(searchQuery.toLowerCase())
-    return matchesStatus && matchesSearch
-  })
+      project.description.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesStatus && matchesSearch;
+  });
+
+  useEffect(() => {
+    const fetchProjects = async () => {
+      setLoading(true);
+
+      const query = gql`
+        query {
+          ${role === "admin" ? "allProjects" : "myProjects"} {
+            id
+            title
+            description
+            status
+            category
+            startDate
+            endDate
+            selectedStudents
+          }
+        }
+      `;
+
+      try {
+        if (role === "admin") {
+          const data: AllProjectsResponse = await graphqlClient.request(query);
+          setProjects(data.allProjects);
+        } else {
+          const data: MyProjectsResponse = await graphqlClient.request(query);
+          setProjects(data.myProjects);
+        }
+      } catch (err) {
+        console.error("Error fetching projects:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (role) {
+      fetchProjects();
+    }
+  }, [role]);
 
   return (
     <div className="p-6 space-y-6">
@@ -36,10 +93,18 @@ export default function ProjectsPage() {
       </motion.h1>
 
       <div className="flex flex-col sm:flex-row justify-between gap-4">
-        <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
-          <Button onClick={() => setIsAddProjectOpen(true)} className="bg-blue-600 hover:bg-blue-700">
-            Add New Project
-          </Button>
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+        >
+          {role === "admin" && (
+            <Button
+              onClick={() => setIsAddProjectOpen(true)}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              Add New Project
+            </Button>
+          )}
         </motion.div>
 
         <motion.div
@@ -49,7 +114,10 @@ export default function ProjectsPage() {
           className="flex flex-1 gap-4"
         >
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400" size={18} />
+            <Search
+              className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400"
+              size={18}
+            />
             <Input
               placeholder="Search projects by title or description..."
               className="pl-10 bg-zinc-800 border-zinc-700 text-white"
@@ -89,15 +157,25 @@ export default function ProjectsPage() {
               exit={{ opacity: 0, scale: 0.95 }}
               transition={{ delay: index * 0.05 }}
             >
-              <ProjectCard project={project} onClick={() => setSelectedProject(project.id)} />
+              <ProjectCard
+                project={project}
+                onClick={() => setSelectedProject(project.id)}
+              />
             </motion.div>
           ))}
         </AnimatePresence>
       </motion.div>
 
-      <AddProjectDialog open={isAddProjectOpen} onOpenChange={setIsAddProjectOpen} />
+      <AddProjectDialog
+        open={isAddProjectOpen}
+        onOpenChange={setIsAddProjectOpen}
+      />
 
-      <ProjectDrawer projectId={selectedProject} open={!!selectedProject} onClose={() => setSelectedProject(null)} />
+      <ProjectDrawer
+        projectId={selectedProject}
+        open={!!selectedProject}
+        onClose={() => setSelectedProject(null)}
+      />
     </div>
-  )
+  );
 }

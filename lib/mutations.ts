@@ -31,3 +31,28 @@ export const LOGIN_MUTATION = gql`
     }
   }
 `;
+
+export const CREATE_PROJECT = gql`
+  mutation CreateProject(
+    $title: String!
+    $description: String
+    $category: String
+    $status: String
+    $startDate: String
+    $endDate: String
+    $selectedStudents: [String]
+  ) {
+    createProject(
+      title: $title
+      description: $description
+      category: $category
+      status: $status
+      startDate: $startDate
+      endDate: $endDate
+      selectedStudents: $selectedStudents
+    ) {
+      id
+      title
+    }
+  }
+`;
