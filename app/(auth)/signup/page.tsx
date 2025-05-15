@@ -1,35 +1,67 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import Link from "next/link"
-import { motion } from "framer-motion"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle
+} from "@/components/ui/card";
+import { graphqlClient } from "@/lib/graphqlClient";
+import { SIGNUP_MUTATION } from "@/lib/mutations";
+import { SignupResponse } from "@/@types/types";
+import { toast } from "sonner";
 
 export default function SignupPage() {
-  const router = useRouter()
+  const router = useRouter();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     password: "",
-    studentId: "",
-  })
+    studentId: ""
+  });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-  }
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    // In a real app, you would validate and register here
-    router.push("/dashboard")
-  }
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const payload = {
+      username: formData.email, // match backend field
+      password: formData.password,
+      name: formData.name,
+      universityId: formData.studentId,
+      role: "student" // assume all users signup as students
+    };
+
+    try {
+      const data = (await graphqlClient.request(
+        SIGNUP_MUTATION,
+        payload
+      )) as SignupResponse;
+      console.log("✅ signed up", data);
+      if (data.signup.id) {
+        toast.success("Account Signed up successfully");
+        router.push("/login");
+      }
+    } catch (err) {
+      console.error("❌ signup error", err);
+      toast.success("Failed Signing Student up!");
+    }
+  };
 
   return (
     <motion.div
@@ -40,8 +72,12 @@ export default function SignupPage() {
     >
       <Card className="bg-zinc-900 border-zinc-800">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-blue-500">Sign Up</CardTitle>
-          <CardDescription className="text-zinc-400">Create a student account to access the system</CardDescription>
+          <CardTitle className="text-2xl font-bold text-blue-500">
+            Sign Up
+          </CardTitle>
+          <CardDescription className="text-zinc-400">
+            Create a student account to access the system
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -62,13 +98,13 @@ export default function SignupPage() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="email" className="text-zinc-300">
-                Email
+                Email or Username
               </Label>
               <Input
                 id="email"
                 name="email"
-                type="email"
-                placeholder="your.email@example.com"
+                type="text"
+                placeholder="John@doe.com or John78"
                 required
                 value={formData.email}
                 onChange={handleChange}
@@ -105,7 +141,10 @@ export default function SignupPage() {
                 className="bg-zinc-800 border-zinc-700 text-white"
               />
             </div>
-            <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700">
+            <Button
+              type="submit"
+              className="w-full bg-blue-600 hover:bg-blue-700"
+            >
               Sign Up
             </Button>
           </form>
@@ -120,5 +159,5 @@ export default function SignupPage() {
         </CardFooter>
       </Card>
     </motion.div>
-  )
+  );
 }
