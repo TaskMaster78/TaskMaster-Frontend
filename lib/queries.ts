@@ -40,3 +40,35 @@ export const getProjectsQuery = (role: "admin" | "student") => gql`
     }
   }
 `;
+
+export const TASKS_BY_PROJECT_QUERY = gql`
+  query TasksByProject($projectId: String!) {
+    tasksByProject(projectId: $projectId) {
+      id
+      taskName
+      description
+      assignedStudent
+      assignedStudentDetails {
+        id
+        name
+      }
+      status
+      dueDate
+    }
+  }
+`;
+
+export const PROJECT_BY_ID_QUERY = gql`
+  query ProjectById($id: String!) {
+    projectById(id: $id) {
+      id
+      title
+      description
+      status
+      category
+      startDate
+      endDate
+      selectedStudents
+    }
+  }
+`;

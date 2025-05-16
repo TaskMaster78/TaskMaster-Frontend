@@ -69,3 +69,29 @@ export type TasksQueryResponse = {
 
 export type StudentSummary = { id: string; name: string };
 export type ProjectSummary = { id: string; title: string };
+
+export interface TaskAPI {
+  id: string;
+  taskName: string;
+  description: string;
+  assignedStudent: string;
+  assignedStudentDetails: StudentSummary[]; // ✅ added
+  status: string;
+  dueDate: string;
+}
+export interface TasksByProjectResponse {
+  tasksByProject: TaskAPI[];
+}
+
+export interface ProjectByIdResponse {
+  projectById: {
+    id: string;
+    title: string;
+    description: string;
+    status: string;
+    category: string;
+    startDate: string;
+    endDate: string;
+    selectedStudents: string[];
+  };
+}
