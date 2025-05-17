@@ -61,7 +61,7 @@ export function ProjectDrawer({
       <SheetContent className="w-[400px] sm:w-[540px] bg-zinc-900 border-zinc-800 text-white p-0">
         <SheetHeader className="p-6 pb-2">
           <SheetTitle className="text-2xl font-bold text-blue-500">
-            Project X
+            Project XYZ
           </SheetTitle>
         </SheetHeader>{" "}
         {projectTasks.length > 0 ? (
