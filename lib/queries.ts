@@ -72,3 +72,13 @@ export const PROJECT_BY_ID_QUERY = gql`
     }
   }
 `;
+
+export const GET_OTHER_USERS = gql`
+  query GetOtherUsers {
+    otherUsers {
+      id
+      name
+      role
+    }
+  }
+`;

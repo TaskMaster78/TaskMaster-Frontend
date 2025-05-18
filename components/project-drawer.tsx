@@ -22,7 +22,6 @@ export function ProjectDrawer({
   onClose
 }: ProjectDrawerProps) {
   const [projectTasks, setProjectTasks] = useState<TaskAPI[]>([]);
-  const [project, setProject] = useState<ProjectByIdResponse>();
 
   useEffect(() => {
     const fetchProjectTasks = async () => {
@@ -61,7 +60,7 @@ export function ProjectDrawer({
       <SheetContent className="w-[400px] sm:w-[540px] bg-zinc-900 border-zinc-800 text-white p-0">
         <SheetHeader className="p-6 pb-2">
           <SheetTitle className="text-2xl font-bold text-blue-500">
-            Project XYZ
+            Project Tasks
           </SheetTitle>
         </SheetHeader>{" "}
         {projectTasks.length > 0 ? (
@@ -69,57 +68,6 @@ export function ProjectDrawer({
             <div key={task.id} className="h-full flex flex-col">
               <div className="flex-1 overflow-auto p-6 pt-2">
                 <div className="space-y-6">
-                  <div>
-                    <h3 className="text-sm font-medium text-zinc-400 mb-1">
-                      Description
-                    </h3>
-                    <p className="text-zinc-300">{task.description}</p>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <h3 className="text-sm font-medium text-zinc-400 mb-1">
-                        Status
-                      </h3>
-                      <Badge className={getStatusColor(task.status)}>
-                        {task.status}
-                      </Badge>
-                    </div>
-
-                    <div>
-                      <h3 className="text-sm font-medium text-zinc-400 mb-1">
-                        End Date
-                      </h3>
-                      <p className="text-zinc-300">{task.dueDate}</p>
-                    </div>
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-medium text-zinc-400 mb-1">
-                      Students
-                    </h3>
-                    <div className="flex flex-wrap gap-2">
-                      {task.assignedStudentDetails.map((student, index) => (
-                        <Badge
-                          key={index}
-                          variant="outline"
-                          className="bg-zinc-800 text-zinc-300"
-                        >
-                          {student.name}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <h3 className="font-medium text-zinc-400">Progress</h3>
-                      <span className="text-zinc-300">{project.progress}%</span>
-                    </div>
-                    <Progress value={project.progress} className="h-2" />
-                  </div> */}
-
-                  <Separator className="bg-zinc-800" />
-
                   <div className="space-y-4">
                     <h3 className="text-lg font-medium text-zinc-300">Tasks</h3>
 
@@ -159,6 +107,7 @@ export function ProjectDrawer({
                       )}
                     </AnimatePresence>
                   </div>
+                  <Separator className="bg-zinc-800" />
                 </div>
               </div>
             </div>

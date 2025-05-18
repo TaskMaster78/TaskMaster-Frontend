@@ -62,6 +62,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       const decoded: { id: string } = jwtDecode(token);
       setUserId(decoded?.id);
+      localStorage.setItem("userId", decoded?.id);
     } catch {
       setUserId(null);
     }
