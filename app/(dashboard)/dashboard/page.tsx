@@ -24,6 +24,36 @@ export default function DashboardPage() {
     { title: "Number of Finished Projects", value: 0 }
   ]);
 
+  const [currentTime, setCurrentTime] = useState(() =>
+    new Date().toLocaleString("en-US", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit"
+    })
+  );
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentTime(
+        new Date().toLocaleString("en-US", {
+          weekday: "long",
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit"
+        })
+      );
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   useEffect(() => {
     const fetchStats = async () => {
       try {
@@ -46,16 +76,6 @@ export default function DashboardPage() {
 
     fetchStats();
   }, []);
-
-  const currentDate = new Date().toLocaleString("en-US", {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit"
-  });
 
   const container = {
     hidden: { opacity: 0 },
@@ -85,7 +105,7 @@ export default function DashboardPage() {
           animate={{ opacity: 1, x: 0 }}
           className="text-zinc-400"
         >
-          {currentDate}
+          {currentTime}
         </motion.div>
       </div>
 
