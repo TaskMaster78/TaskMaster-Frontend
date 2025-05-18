@@ -52,7 +52,7 @@ export default function ChatPage() {
   }, []);
 
   useEffect(() => {
-    socket.on("receiveMessage", (message) => {
+    socket.on("receiveMessage", (message: Message) => {
       const senderId = message.sender;
 
       setMessages((prev) => ({

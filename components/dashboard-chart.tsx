@@ -1,15 +1,31 @@
-"use client"
-import { motion } from "framer-motion"
-import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts"
+"use client";
 
-const data = [
-  { name: "Projects", count: 5, color: "#2A4858" },
-  { name: "Students", count: 20, color: "#1E5C8D" },
-  { name: "Tasks", count: 10, color: "#6D5A31" },
-  { name: "Finished Projects", count: 2, color: "#3D2A58" },
-]
+import { motion } from "framer-motion";
+import {
+  Bar,
+  BarChart,
+  ResponsiveContainer,
+  XAxis,
+  YAxis,
+  Tooltip
+} from "recharts";
 
-export function DashboardChart() {
+interface StatItem {
+  title: string;
+  value: number;
+}
+
+interface DashboardChartProps {
+  stats: StatItem[];
+}
+
+export function DashboardChart({ stats }: DashboardChartProps) {
+  // Convert to chart-friendly format
+  const chartData = stats.map((stat) => ({
+    name: stat.title.replace("Number of ", ""),
+    count: stat.value
+  }));
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -18,15 +34,29 @@ export function DashboardChart() {
       className="h-full w-full"
     >
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-          <XAxis dataKey="name" stroke="#6b7280" fontSize={12} tickLine={false} axisLine={false} />
-          <YAxis stroke="#6b7280" fontSize={12} tickLine={false} axisLine={false} />
+        <BarChart
+          data={chartData}
+          margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+        >
+          <XAxis
+            dataKey="name"
+            stroke="#6b7280"
+            fontSize={12}
+            tickLine={false}
+            axisLine={false}
+          />
+          <YAxis
+            stroke="#6b7280"
+            fontSize={12}
+            tickLine={false}
+            axisLine={false}
+          />
           <Tooltip
             contentStyle={{
               backgroundColor: "#18181b",
               border: "1px solid #27272a",
               borderRadius: "6px",
-              color: "#e4e4e7",
+              color: "#e4e4e7"
             }}
             labelStyle={{ fontWeight: "bold", color: "#3b82f6" }}
           />
@@ -34,5 +64,5 @@ export function DashboardChart() {
         </BarChart>
       </ResponsiveContainer>
     </motion.div>
-  )
+  );
 }

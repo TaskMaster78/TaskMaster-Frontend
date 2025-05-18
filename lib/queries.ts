@@ -82,3 +82,14 @@ export const GET_OTHER_USERS = gql`
     }
   }
 `;
+
+export const DASHBOARD_STATS_QUERY = gql`
+  query DashboardStats {
+    dashboardStats {
+      totalProjects
+      totalStudents
+      totalTasks
+      finishedProjects
+    }
+  }
+`;
