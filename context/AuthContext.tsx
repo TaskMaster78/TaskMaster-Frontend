@@ -5,6 +5,7 @@ import { LOGIN_MUTATION } from "@/lib/mutations";
 import { useRouter } from "next/navigation";
 import { LoginResponse } from "@/@types/types";
 import { getGraphqlClient } from "@/lib/graphqlClient";
+import { jwtDecode } from "jwt-decode";
 
 type Role = "admin" | "student";
 
@@ -93,7 +94,4 @@ export const useAuth = () => {
   if (!context) throw new Error("useAuth must be used within an AuthProvider");
   return context;
 };
-function jwtDecode(savedToken: string): any {
-    throw new Error("Function not implemented.");
-}
 

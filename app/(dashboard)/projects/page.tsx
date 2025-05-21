@@ -65,10 +65,14 @@ export default function ProjectsPage() {
 
       try {
         if (role === "admin") {
-          const data: AllProjectsResponse = await getGraphqlClient().request(query);
+          const data: AllProjectsResponse = await getGraphqlClient().request(
+            query
+          );
           setProjects(data.allProjects);
         } else {
-          const data: MyProjectsResponse = await getGraphqlClient().request(query);
+          const data: MyProjectsResponse = await getGraphqlClient().request(
+            query
+          );
           setProjects(data.myProjects);
         }
       } catch (err) {
@@ -166,7 +170,16 @@ export default function ProjectsPage() {
               </motion.div>
             ))
           ) : (
-            <div>No projects available to display</div> // TODO: fix the style of this div here to display a safe message if there is no projects.
+            <div className="col-span-1 md:col-span-2 lg:col-span-3 flex items-center justify-center w-full min-h-[50vh]">
+              <div className="flex items-center justify-center w-full max-w-md h-40 text-zinc-500 bg-zinc-900/50 rounded-lg border border-zinc-800">
+                <div className="text-center">
+                  <p className="text-lg font-medium">
+                    No projects available to display
+                  </p>
+                  <p className="text-sm">Create a new project to get started</p>
+                </div>
+              </div>
+            </div>
           )}
         </AnimatePresence>
       </motion.div>

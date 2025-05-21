@@ -93,3 +93,15 @@ export const DASHBOARD_STATS_QUERY = gql`
     }
   }
 `;
+
+export const ME_QUERY = gql`
+  query Me {
+    me {
+      id
+      username
+      name
+      role
+      universityId
+    }
+  }
+`;
