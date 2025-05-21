@@ -95,3 +95,17 @@ export interface ProjectByIdResponse {
     selectedStudents: string[];
   };
 }
+
+export interface Me {
+  id: string;
+  username: string;
+  name: string;
+  role: "admin" | "student";
+  universityId: string;
+  phone?: string;
+  department?: string;
+  bio?: string;
+}
+export interface MeResponse {
+  me: Me;
+}

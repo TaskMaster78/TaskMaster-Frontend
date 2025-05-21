@@ -105,3 +105,20 @@ export const ME_QUERY = gql`
     }
   }
 `;
+
+export const UPDATE_USER_MUTATION = gql`
+  mutation UpdateUser(
+    $name: String
+    $phone: String
+    $department: String
+    $bio: String
+  ) {
+    updateUser(name: $name, phone: $phone, department: $department, bio: $bio) {
+      id
+      name
+      phone
+      department
+      bio
+    }
+  }
+`;

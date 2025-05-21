@@ -10,23 +10,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar } from "@/components/ui/avatar";
 import { useAuth } from "@/context/AuthContext";
 import { useEffect, useState } from "react";
 import { getGraphqlClient } from "@/lib/graphqlClient";
 import { ME_QUERY } from "@/lib/queries";
 import Link from "next/link";
+import { Me, MeResponse } from "@/@types/types";
 
-interface Me {
-  id: string;
-  username: string;
-  name: string;
-  role: "admin" | "student";
-  universityId: string;
-}
-export interface MeResponse {
-  me: Me;
-}
 
 export function UserNav() {
   const router = useRouter();
