@@ -55,7 +55,7 @@ export default function AddTaskDialog({
 
   const [students, setStudents] = useState<{ id: string; name: string }[]>([]);
   const [projects, setProjects] = useState<{ id: string; title: string }[]>([]);
-  const { role } = useAuth();
+  const { role, token } = useAuth();
 
   useEffect(() => {
     if (existingTask && taskId) {
@@ -83,6 +83,8 @@ export default function AddTaskDialog({
 
   useEffect(() => {
     const fetchData = async () => {
+      if (!token) return; // ✅ Skip if no token
+
       try {
         const studentData = await getGraphqlClient().request<{
           students: StudentSummary[];
@@ -101,7 +103,7 @@ export default function AddTaskDialog({
     };
 
     fetchData();
-  }, [role]);
+  }, [role, token]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
