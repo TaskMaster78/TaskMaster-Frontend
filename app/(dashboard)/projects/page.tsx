@@ -187,6 +187,7 @@ export default function ProjectsPage() {
       <AddProjectDialog
         open={isAddProjectOpen}
         onOpenChange={setIsAddProjectOpen}
+        setProjects={setProjects}
       />
 
       <ProjectDrawer

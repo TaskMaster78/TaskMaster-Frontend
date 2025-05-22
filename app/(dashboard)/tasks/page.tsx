@@ -33,7 +33,9 @@ export default function TasksPage() {
   useEffect(() => {
     const fetchTasks = async () => {
       try {
-        const data = await getGraphqlClient().request<{ tasks: Task[] }>(TASKS_QUERY);
+        const data = await getGraphqlClient().request<{ tasks: Task[] }>(
+          TASKS_QUERY
+        );
         setTasks(data.tasks);
       } catch (error) {
         console.error("Failed to fetch tasks:", error);
@@ -42,6 +44,12 @@ export default function TasksPage() {
 
     fetchTasks();
   }, []);
+
+  const handleTaskAdd = (task: Task) => {
+    console.log(task);
+
+    setTasks((prev) => [...prev, task]);
+  };
 
   const getSortedTasks = () => {
     return [...tasks].sort((a, b) => {
@@ -127,7 +135,9 @@ export default function TasksPage() {
               <TableHead className="text-zinc-400 w-[80px]">Task ID</TableHead>
               <TableHead className="text-zinc-400">Project</TableHead>
               <TableHead className="text-zinc-400">Task Name</TableHead>
-              <TableHead className="text-zinc-400 hidden md:table-cell">Description</TableHead>
+              <TableHead className="text-zinc-400 hidden md:table-cell">
+                Description
+              </TableHead>
               <TableHead className="text-zinc-400">Assigned Student</TableHead>
               <TableHead className="text-zinc-400">Status</TableHead>
               <TableHead className="text-zinc-400">Due Date</TableHead>
@@ -146,10 +156,14 @@ export default function TasksPage() {
                 <TableCell className="font-medium">{task.id}</TableCell>
                 <TableCell>{task.projectTitle}</TableCell>
                 <TableCell>{task.taskName}</TableCell>
-                <TableCell className="hidden md:table-cell">{task.description}</TableCell>
+                <TableCell className="hidden md:table-cell">
+                  {task.description}
+                </TableCell>
                 <TableCell>{task.assignedStudent}</TableCell>
                 <TableCell>
-                  <Badge className={getStatusColor(task.status)}>{task.status}</Badge>
+                  <Badge className={getStatusColor(task.status)}>
+                    {task.status}
+                  </Badge>
                 </TableCell>
                 <TableCell>{task.dueDate}</TableCell>
               </TableRow>
@@ -163,6 +177,7 @@ export default function TasksPage() {
         onOpenChange={setIsAddTaskOpen}
         taskId={editingTask}
         existingTask={tasks.find((t) => t.id === editingTask)}
+        onTaskAdd={handleTaskAdd}
       />
     </div>
   );

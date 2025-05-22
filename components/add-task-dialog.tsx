@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -24,7 +24,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { CREATE_TASK, UPDATE_TASK } from "@/lib/mutations";
 import { getProjectsQuery, STUDENTS_QUERY } from "@/lib/queries";
 import { toast } from "sonner";
-import { ProjectSummary, StudentSummary } from "@/@types/types";
+import { ProjectSummary, StudentSummary, Task } from "@/@types/types";
 import { useAuth } from "@/context/AuthContext";
 import { getGraphqlClient } from "@/lib/graphqlClient";
 
@@ -33,13 +33,15 @@ interface AddTaskDialogProps {
   onOpenChange: (open: boolean) => void;
   taskId?: string | null;
   existingTask?: any;
+  onTaskAdd: (task: Task) => void;
 }
 
 export default function AddTaskDialog({
   open,
   onOpenChange,
   taskId,
-  existingTask
+  existingTask,
+  onTaskAdd
 }: AddTaskDialogProps) {
   const [formData, setFormData] = useState({
     projectId: "",
@@ -116,12 +118,22 @@ export default function AddTaskDialog({
 
     try {
       if (taskId) {
-        await getGraphqlClient().request(UPDATE_TASK, { id: taskId, ...variables });
+        await getGraphqlClient().request(UPDATE_TASK, {
+          id: taskId,
+          ...variables
+        });
+
+        onTaskAdd({ id: taskId, ...variables } as Task);
         toast.success("Task updated successfully!");
       } else {
-        await getGraphqlClient().request(CREATE_TASK, variables);
+        const { createTask } = await getGraphqlClient().request<{
+          createTask: Task;
+        }>(CREATE_TASK, variables);
+
+        onTaskAdd(createTask); // ✅ Add the new task to the main list
         toast.success("Task created successfully!");
       }
+
       onOpenChange(false);
     } catch (err) {
       console.error(err);

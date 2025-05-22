@@ -2,7 +2,7 @@
 
 import type React from "react";
 
-import { useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -25,20 +25,23 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { CREATE_PROJECT } from "@/lib/mutations";
-import { Student, StudentsQueryResponse } from "@/@types/types";
+import { ProjectAPI, Student, StudentsQueryResponse } from "@/@types/types";
 import { STUDENTS_QUERY } from "@/lib/queries";
 import { getGraphqlClient } from "@/lib/graphqlClient";
 
 interface AddProjectDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  setProjects: Dispatch<SetStateAction<ProjectAPI[]>>;
 }
 
 export function AddProjectDialog({
   open,
-  onOpenChange
+  onOpenChange,
+  setProjects
 }: AddProjectDialogProps) {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<ProjectAPI>({
+    id: "",
     title: "",
     description: "",
     category: "",
@@ -84,6 +87,7 @@ export function AddProjectDialog({
       await getGraphqlClient().request(CREATE_PROJECT, formData);
       toast.success("Project created successfully!");
       onOpenChange(false);
+      setProjects((prev) => [...prev, formData]);
     } catch (err) {
       console.error(err);
       toast.error("Failed to create project.");

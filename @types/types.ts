@@ -59,8 +59,6 @@ export type Task = {
   assignedStudent: string;
   status: string;
   dueDate: string;
-  createdAt: string;
-  updatedAt: string;
 };
 
 export type TasksQueryResponse = {
