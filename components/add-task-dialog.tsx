@@ -118,19 +118,18 @@ export default function AddTaskDialog({
 
     try {
       if (taskId) {
-        await getGraphqlClient().request(UPDATE_TASK, {
-          id: taskId,
-          ...variables
-        });
+        const { updateTask } = await getGraphqlClient().request<{
+          updateTask: Task;
+        }>(UPDATE_TASK, { id: taskId, ...variables });
 
-        onTaskAdd({ id: taskId, ...variables } as Task);
+        onTaskAdd(updateTask); // This will update the task in state correctly
         toast.success("Task updated successfully!");
       } else {
         const { createTask } = await getGraphqlClient().request<{
           createTask: Task;
         }>(CREATE_TASK, variables);
 
-        onTaskAdd(createTask); // ✅ Add the new task to the main list
+        onTaskAdd(createTask); // ✅ Add the persisted task
         toast.success("Task created successfully!");
       }
 

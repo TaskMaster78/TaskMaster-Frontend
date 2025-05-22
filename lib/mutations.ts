@@ -62,10 +62,10 @@ export const CREATE_TASK = gql`
     $projectId: String!
     $projectTitle: String!
     $taskName: String!
-    $description: String!
+    $description: String
     $assignedStudent: String!
-    $status: String!
-    $dueDate: String!
+    $status: String
+    $dueDate: String
   ) {
     createTask(
       projectId: $projectId
