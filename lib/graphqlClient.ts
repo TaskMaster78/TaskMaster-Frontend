@@ -1,6 +1,6 @@
 import { GraphQLClient } from "graphql-request";
 
-const endpoint = "http://localhost:4000/graphql";
+const endpoint = process.env.NEXT_PUBLIC_API_URL! as string;
 
 export const getGraphqlClient = () => {
   const token =
