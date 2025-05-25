@@ -144,9 +144,9 @@ export default function TasksPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {getSortedTasks().map((task) => (
+            {getSortedTasks().map((task, index) => (
               <TableRow
-                key={task.id}
+                key={`task-${index}-${task.id}`}
                 className="hover:bg-zinc-800/50 border-zinc-800 cursor-pointer"
                 onClick={() => {
                   setEditingTask(task.id);

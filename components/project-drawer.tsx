@@ -14,14 +14,17 @@ interface ProjectDrawerProps {
   projectId: string | null;
   open: boolean;
   onClose: () => void;
+  setProgress: (p: number) => void;
 }
 
 export function ProjectDrawer({
   projectId,
   open,
-  onClose
+  onClose,
+  setProgress
 }: ProjectDrawerProps) {
   const [projectTasks, setProjectTasks] = useState<TaskAPI[]>([]);
+  const [projectProgress, setProjectProgress] = useState(0);
 
   useEffect(() => {
     const fetchProjectTasks = async () => {
@@ -31,9 +34,18 @@ export function ProjectDrawer({
           await getGraphqlClient().request(TASKS_BY_PROJECT_QUERY, {
             projectId
           });
-        console.log(res.tasksByProject);
 
-        setProjectTasks(res.tasksByProject);
+        const tasks = res.tasksByProject;
+        setProjectTasks(tasks);
+
+        const completedCount = tasks.filter(
+          (t) => t.status === "Completed"
+        ).length;
+        const progressPercent =
+          tasks.length > 0
+            ? Math.round((completedCount / tasks.length) * 100)
+            : 0;
+        setProjectProgress(progressPercent);
       } catch (error) {
         console.error("Error loading tasks:", error);
       }
@@ -41,6 +53,10 @@ export function ProjectDrawer({
 
     fetchProjectTasks();
   }, [projectId]);
+
+  useEffect(() => {
+    setProgress(projectProgress);
+  }, [projectProgress]);
 
   const getStatusColor = (status: string) => {
     switch (status) {

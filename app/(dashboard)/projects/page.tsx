@@ -34,6 +34,7 @@ export default function ProjectsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [projects, setProjects] = useState<ProjectAPI[]>([]);
   const [loading, setLoading] = useState(true);
+  const [progress, setProgress] = useState<number>(0);
 
   const filteredProjects = projects.filter((project) => {
     const matchesStatus =
@@ -43,6 +44,10 @@ export default function ProjectsPage() {
       project.description.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesStatus && matchesSearch;
   });
+
+  const handleProgress = (newProgress: number) => {
+    setProgress(newProgress);
+  };
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -194,6 +199,7 @@ export default function ProjectsPage() {
         projectId={selectedProject}
         open={!!selectedProject}
         onClose={() => setSelectedProject(null)}
+        setProgress={handleProgress}
       />
     </div>
   );

@@ -3,7 +3,10 @@
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { ProjectAPI, ProjectUI } from "@/@types/types";
+import { ProjectAPI, ProjectUI, TaskAPI } from "@/@types/types";
+import { useEffect, useState } from "react";
+import { getGraphqlClient } from "@/lib/graphqlClient";
+import { TASKS_BY_PROJECT_QUERY } from "@/lib/queries";
 
 interface ProjectCardProps {
   project: ProjectAPI;
@@ -16,6 +19,33 @@ export function ProjectCard({ project, onClick }: ProjectCardProps) {
     students: project.selectedStudents,
     progress: 100
   };
+  const [progress, setProgress] = useState(0);
+  useEffect(() => {
+    const fetchProjectTasks = async () => {
+      if (!projectUi.id) return;
+      try {
+        const res: { tasksByProject: TaskAPI[] } =
+          await getGraphqlClient().request(TASKS_BY_PROJECT_QUERY, {
+            projectId: projectUi.id
+          });
+
+        const tasks = res.tasksByProject;
+
+        const completedCount = tasks.filter(
+          (t) => t.status === "Completed"
+        ).length;
+        const progressPercent =
+          tasks.length > 0
+            ? Math.round((completedCount / tasks.length) * 100)
+            : 0;
+        setProgress(progressPercent);
+      } catch (error) {
+        console.error("Error loading tasks:", error);
+      }
+    };
+
+    fetchProjectTasks();
+  }, [projectUi.id]);
 
   const getBorderColor = () => {
     switch (project.category) {
@@ -62,9 +92,9 @@ export function ProjectCard({ project, onClick }: ProjectCardProps) {
           <div className="space-y-2">
             <div className="flex justify-between text-xs">
               <span className="text-zinc-400">Progress</span>
-              <span className="text-zinc-300">{projectUi.progress}%</span>
+              <span className="text-zinc-300">{progress}%</span>
             </div>
-            <Progress value={projectUi.progress} className="h-2" />
+            <Progress value={progress} className="h-2" />
           </div>
 
           <div className="flex justify-between text-xs text-zinc-500">
