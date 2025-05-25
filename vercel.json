@@ -1,0 +1,9 @@
+{
+    "build": {
+      "env": {
+        "NEXT_PUBLIC_API_URL": "https://taskmaster-backend-u96y.onrender.com/graphql"
+      }
+    },
+    "installCommand": "npm install"
+  }
+  
